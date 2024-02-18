@@ -141,6 +141,7 @@ while (True):
   curOutputLine=[]
   weight = 0
   # MAIN LOOP BUILDING GRAPH
+  
   for i in sorted_indices:
     if len(curOutputLine) > 0:
       if len(curOutputLine[3]) == axisAmount:
@@ -173,14 +174,17 @@ while (True):
       buketi[buketAxisOne].append(axisTwo)
     ## they are both in different buket
     elif axisOne != axisTwo:
-      for axis in buketi[buketAxisTwo]:
-        buketi[buketAxisOne].append(axis)
-      buketi.remove(buketi[buketAxisTwo]) # deleting this buket
+      ### MERGING TWO BUKETS
+      lowerIndexBuket = min(buketAxisOne, buketAxisTwo)
+      higherIndexBuket = max(buketAxisTwo, buketAxisOne)
+      for axis in buketi[higherIndexBuket]:
+        buketi[lowerIndexBuket].append(axis)
+      buketi.remove(buketi[higherIndexBuket]) # deleting this buket
     
     for b in buketi:
       curOutputLine.append(b)
     ## OUTPUT OF CURRENT LINE 
-    print(curOutputLine)
+    print(f"{i+1} {curOutputLine}")
 
     ## SUMMING WEIGHTS OF "г"
     if curOutputLine[1] == "г":
