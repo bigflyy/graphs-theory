@@ -72,12 +72,24 @@ class GraphVisualization:
 
         ax = plt.gca()
         ax.margins(0.08)
-        plt.axis("off")
+        plt.vertex("off")
         plt.tight_layout()
         plt.show()
 
+# letter To Index
+def letterToIndex(letter): 
+  # ord(char) returns ASCII of char
+  # chr(num) returns char 
+  # ASCII : a b c d e f g h i j k l m n o p q r s t u v w x y z 
+  return ord(letter.lower())-97 # because a is 97 => so a will be 0 , b 1 and etc. 
+# Index to letter
+def indexToLetter(index): 
+  # ord(char) returns ASCII of char
+  # chr(num) returns char 
+  # ASCII : a b c d e f g h i j k l m n o p q r s t u v w x y z 
+  return chr(index+97) # because a is 97 => so a will be 0 , b 1 and etc. 
 # alphabetically
-def sortAxis (a,b):
+def sortvertex (a,b):
   first_letter = ""
   second_letter =""
   a = a.lower()
@@ -91,17 +103,63 @@ def sortAxis (a,b):
   else:
     return a,b
   return first_letter, second_letter
+def sortEdges(edges):
+  # First sorted by first vertex letter, then by second, then by weight 
+  return sorted(sorted(sorted(edges, key= lambda x: x[0]), key=lambda x: x[1]), key=lambda x : x[2])
+def edgesToAdjMatrix(vertices, edges, isSorted = False):
+  if not isSorted:
+    edges = sortEdges() # Safe redundancy
+    vertices=sorted(vertices)
+  
+  # the order of letter is in letterToIndex()
+  cols_count = rows_count = len(vertices)
+  adjMatrix = [[0 for x in range(cols_count)] for x in range(rows_count)] 
+  for edge in edges:
+    vertexOne = edge[0]
+    vertexTwo = edge[1]
+    weight = edge[2]
+    adjMatrix[letterToIndex(vertexOne)][letterToIndex(vertexTwo)] = weight
+    
+# ——————————————
+def printDashes(dashesAmount):
+  pass
+def printMatrix(adjMatrix, startingLetter=None, letterOrder=None):
+  # the order of letter is in letterToIndex
+  # Header:
+  headerStr = ' '
+  headerDashesStr = '—'
+  for i in range(len(adjMatrix[0])):
+    headerStr += f"|{indexToLetter(i)}|"
+    headerDashesStr += '—'
+  print(headerStr)
+  print(headerDashesStr)
 
-def edgesToAdjMatrix():
+
+  if startingLetter != None:
+    pass # TODO: write first then exclude
+  else:
+    for i in range(len(adjMatrix)): # rows amount (строки)
+      outputStr = f'{indexToLetter(i)}|'
+      dashesStr = '—'
+      for j in range(len(adjMatrix[0])): #  columns amount (столбцы)
+        outputStr += f'{adjMatrix[i][j]}|'
+        dashesStr += '—'
+      print(outputStr)
+      print(dashesStr)
+
+        
 
 
 # Some variables for everything
 G = GraphVisualization() 
-rebra=[]
-rebra_colored=[]
-axisAmount=0
-amountOfRebra = 0
+edges=[]            # [[vertexOne, vertexTwo, Weight], ...]
+edges_colored=[]
+vertexAmount=0
+amountOfedges = 0
 adjacencyMatrix = []
+vertices_ = ['a','b','r','c']
+edges_ = [['b', 'a', '50'], ['a', 'r', '1'], ['c', 'a', '3']]
+printMatrix(edgesToAdjMatrix())
 
 # USER INPUT
 inputType = int(input(f"Выберите тип ввода:\n "
@@ -109,62 +167,64 @@ inputType = int(input(f"Выберите тип ввода:\n "
              f"{MATRIX_INPUT_TYPE}. Ребра по матрице смежности (неориетированный).\n"
              f"{ORIENTED_MATRIX_INPUT_TYPE}. Ребра по матрице смежности (ориентированный).\n"))
 if inputType == MANUAL_INPUT_TYPE:
-## axis amount
-  axisAmount = int(input("Введите кол-во вершин: "))
+## vertex amount
+  vertexAmount = int(input("Введите кол-во вершин: "))
 
 
-  print(rebra)
-  ## actually inputing rebra 
+  print(edges)
+  ## actually inputing edges 
   print("Вводите ребра в формате a b 10 (первая вершина, вторая, вес). Введите exit чтобы закончить")
   userInput = ""
   while (True):
     userInput = input().split()
     if (userInput == ["exit"]): break
     userInput[2] = int(userInput[2])
-    rebra.append(userInput)
+    edges.append(userInput)
 elif inputType == MATRIX_INPUT_TYPE:
-  axes = input("Введите все вершины через пробел: a b c d ...").split()
-  axisAmount = len(axes)
-  axisIndex = 0
-  for axisOne in axes:
-    axesTwoAndWeight = input(f"Введите вершины (кроме {axes[:axisIndex]})которым {axisOne} смежна: ").split()
-    axisIndex+=1
-    if axesTwoAndWeight == '': continue
-    for i in range(0,len(axesTwoAndWeight), 2):
-      axisTwo = axesTwoAndWeight[i] 
-      weight_ = int(axesTwoAndWeight[i+1])
-      rebra.append([axisOne,axisTwo,weight_])
+  vertices = input("Введите все вершины через пробел: a b c d ...").split()
+  vertexAmount = len(vertices)
+  vertexIndex = 0
+  for vertexOne in vertices:
+    verticesTwoAndWeight = input(f"Введите вершины (кроме {vertices[:vertexIndex]})которым {vertexOne} смежна: ").split()
+    vertexIndex+=1
+    if verticesTwoAndWeight == '': continue
+    for i in range(0,len(verticesTwoAndWeight), 2):
+      vertexTwo = verticesTwoAndWeight[i] 
+      weight_ = int(verticesTwoAndWeight[i+1])
+      edges.append([vertexOne,vertexTwo,weight_])
 elif inputType == ORIENTED_MATRIX_INPUT_TYPE:
-    axes = input("Введите все вершины через пробел: a b c d ...").split()
-    axisAmount = len(axes)
-    axisIndex = 0
-    for axisOne in axes:
-      axesTwoAndWeight = input(f"Введите вершины которым {axisOne} смежна: (b 40 c 50 d 20) ").split()
-      axisIndex+=1
-      if axesTwoAndWeight == '': continue
-      for i in range(0,len(axesTwoAndWeight), 2):
-        axisTwo = axesTwoAndWeight[i] 
-        weight_ = int(axesTwoAndWeight[i+1])
-        rebra.append([axisOne,axisTwo,weight_])
+    vertices = input("Введите все вершины через пробел: a b c d ...").split()
+    vertexAmount = len(vertices)
+    vertexIndex = 0
+    for vertexOne in vertices:
+      verticesTwoAndWeight = input(f"Введите вершины которым {vertexOne} смежна: (b 40 c 50 d 20) ").split()
+      vertexIndex+=1
+      if verticesTwoAndWeight == '': continue
+      for i in range(0,len(verticesTwoAndWeight), 2):
+        vertexTwo = verticesTwoAndWeight[i] 
+        weight_ = int(verticesTwoAndWeight[i+1])
+        edges.append([vertexOne,vertexTwo,weight_])
 
-rebra_colored=rebra
-## Main loop to build several graphs on one set of rebra
+edges_colored=edges
+edges = sortEdges(edges)
+
+## Main loop to build several graphs on one set of edges
 while (True):
   ## graph type
   graphType = int(input(f"Какой граф нужно построить:\n "
                     f"{MINIMAL_COVERING_TREE}.Минимальное покрывающее дерево."
                     f"\n{MAXIMUM_COVERING_TREE}.Максимальное покрывающее дерево.\n"
                     f"{FORD_SHORTEST_PATH}. Дерево кратчайших путей по Форду.\n"))
-  # SORTING INDICES BY REBRA WEIGHT
+  # SORTING INDICES BY edges WEIGHT
   index = 0
-  rebra_weights = [x[2] for x in rebra]
-  print(rebra_weights)
+  edges_weights = [x[2] for x in edges]
+  print(edges_weights)
   sorted_indices = []
   if graphType == MINIMAL_COVERING_TREE  or graphType == MAXIMUM_COVERING_TREE:
     if graphType==MINIMAL_COVERING_TREE:
-      sorted_indices = np.argsort(rebra_weights)
+      sorted_indices = np.argsort(edges_weights)
     elif graphType==MAXIMUM_COVERING_TREE:
-      sorted_indices = np.argsort(rebra_weights)[::-1]
+      sorted_indices = np.argsort(edges_weights)[::-1]
 
     print("sorted indices : ", sorted_indices)
 
@@ -176,41 +236,41 @@ while (True):
     
     for i in sorted_indices:
       if len(curOutputLine) > 0:
-        if len(curOutputLine[3]) == axisAmount:
+        if len(curOutputLine[3]) == vertexAmount:
           break
-      axisOne = rebra[i][0]
-      axisTwo = rebra[i][1]
-      if axisOne == axisTwo: 
+      vertexOne = edges[i][0]
+      vertexTwo = edges[i][1]
+      if vertexOne == vertexTwo: 
         continue ## This shouldn't be a loop 
-      axisOne, axisTwo = sortAxis(axisOne, axisTwo)
-      buketAxisOne = -1
-      buketAxisTwo = -1
+      vertexOne, vertexTwo = sortvertex(vertexOne, vertexTwo)
+      buketvertexOne = -1
+      buketvertexTwo = -1
       ## 0,                            1,   2,   3, 4
       ## [вершина, вершина] - ребро, цвет, вес, б1, б2 ... 
-      curOutputLine = [[axisOne, axisTwo], "г", rebra[i][2]]
+      curOutputLine = [[vertexOne, vertexTwo], "г", edges[i][2]]
       for buket_i in range(len(buketi)):
-        if (axisOne in buketi[buket_i]): buketAxisOne = buket_i
-        if (axisTwo in buketi[buket_i]): buketAxisTwo = buket_i
+        if (vertexOne in buketi[buket_i]): buketvertexOne = buket_i
+        if (vertexTwo in buketi[buket_i]): buketvertexTwo = buket_i
       ## from same buket
-      if buketAxisOne == buketAxisTwo and buketAxisOne != -1:
+      if buketvertexOne == buketvertexTwo and buketvertexOne != -1:
         curOutputLine[1] = "о"
       ## none are from buket
-      elif buketAxisOne == -1 and buketAxisTwo == -1:
+      elif buketvertexOne == -1 and buketvertexTwo == -1:
         curOutputLine[1]="г"
-        buketi.append([axisOne, axisTwo]) # new buket created
-      ## axisOne in buket and axisTwo is not
-      elif buketAxisOne == -1 and buketAxisTwo != -1:
-        buketi[buketAxisTwo].append(axisOne)
-      ## axisTwo in buket and axisOne is not
-      elif buketAxisTwo == -1 and buketAxisOne != -1:
-        buketi[buketAxisOne].append(axisTwo)
+        buketi.append([vertexOne, vertexTwo]) # new buket created
+      ## vertexOne in buket and vertexTwo is not
+      elif buketvertexOne == -1 and buketvertexTwo != -1:
+        buketi[buketvertexTwo].append(vertexOne)
+      ## vertexTwo in buket and vertexOne is not
+      elif buketvertexTwo == -1 and buketvertexOne != -1:
+        buketi[buketvertexOne].append(vertexTwo)
       ## they are both in different buket
-      elif axisOne != axisTwo:
+      elif vertexOne != vertexTwo:
         ### MERGING TWO BUKETS
-        lowerIndexBuket = min(buketAxisOne, buketAxisTwo)
-        higherIndexBuket = max(buketAxisTwo, buketAxisOne)
-        for axis in buketi[higherIndexBuket]:
-          buketi[lowerIndexBuket].append(axis)
+        lowerIndexBuket = min(buketvertexOne, buketvertexTwo)
+        higherIndexBuket = max(buketvertexTwo, buketvertexOne)
+        for vertex in buketi[higherIndexBuket]:
+          buketi[lowerIndexBuket].append(vertex)
         buketi.remove(buketi[higherIndexBuket]) # deleting this buket
       
       for b in buketi:
@@ -231,10 +291,11 @@ while (True):
     G.visualize()
     
     # PRINT IF IT WORKED
-    if len(curOutputLine[3]) != axisAmount:
+    if len(curOutputLine[3]) != vertexAmount:
       print('Doesnt exist')
     else:
       print("Such tree exists")
         
     input("\nPress any key to continue...\n")
   elif graphType == FORD_SHORTEST_PATH:
+    pass
