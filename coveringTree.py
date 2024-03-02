@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 # вершина = vertex / vertices
 # дуга = edge / edges
 
+OUTPUT_MATRIX = 0
+
 MINIMAL_COVERING_TREE = 1
 MAXIMUM_COVERING_TREE = 2
 
@@ -17,9 +19,11 @@ MINIMAL_ORIENTED_COVERING_TREE = 6
 FORD_SHORTEST_PATH = 7
 
 
+
 MANUAL_INPUT_TYPE = 1
 MATRIX_INPUT_TYPE = 2
 ORIENTED_MATRIX_INPUT_TYPE = 3
+IMPORT_TXT_INPUT_TYPE = 4
 
 LETTER_TO_INDEX = {}
 INDEX_TO_LETTER = {}
@@ -173,12 +177,26 @@ def printMatrix(adjMatrix, startingLetter=None, letterOrder=None):
       print(outputStr)
       print(dashesStr)
 
-        
+
+def printMatrixToFile():
+  pass
+def importAdjMatrix():
+  pass
+def importEdges():
+  pass
+def importVertices():
+  pass
+def exportAdjMatrix():
+  pass  
+def exportEdges():
+  pass
+def exportVertices():
+  pass
 
 
 # Some variables for everything
 G = GraphVisualization() 
-edges=[]            # [[vertexOne, vertexTwo, Weight], ...]
+edges=[]            # [[vertexOne, vertexTwo, Weight, color], ...]
 edges_colored=[]
 vertexAmount=0
 amountOfedges = 0
@@ -199,8 +217,6 @@ inputType = int(input(f"Выберите тип ввода:\n "
 if inputType == MANUAL_INPUT_TYPE:
 ## vertex amount
   vertexAmount = int(input("Введите кол-во вершин: "))
-
-
   print(edges)
   ## actually inputing edges 
   print("Вводите ребра в формате a b 10 (первая вершина, вторая, вес). Введите exit чтобы закончить")
@@ -234,7 +250,8 @@ elif inputType == ORIENTED_MATRIX_INPUT_TYPE:
         vertexTwo = verticesTwoAndWeight[i] 
         weight_ = int(verticesTwoAndWeight[i+1])
         edges.append([vertexOne,vertexTwo,weight_])
-
+elif inputType == IMPORT_TXT_INPUT_TYPE:
+  importAdjMatrix(adjMatrix)
 # FORMATTING DATA BEFORE DOING ANYTHING AS IT IS EXPECTED TO BE
 edges_colored=edges
 edges = sortEdges(edges)
@@ -244,11 +261,13 @@ vertices = list(set(vertices))
 
 createIndexToLetter(vertices)
 createLetterToIndexDict(vertices)
+adjMatrix = edgesToAdjMatrix(edges)
 
 ## Main loop to build several graphs on one set of edges
 while (True):
   ## graph type
-  graphType = int(input(f"Какой граф нужно построить:\n "
+  action = int(input(f"Выберите действие:\n "
+                    f"{OUTPUT_MATRIX}. Вывести матрицу смежности."
                     f"{MINIMAL_COVERING_TREE}.Минимальное покрывающее дерево."
                     f"\n{MAXIMUM_COVERING_TREE}.Максимальное покрывающее дерево.\n"
                     f"{FORD_SHORTEST_PATH}. Дерево кратчайших путей по Форду.\n"))
@@ -257,10 +276,10 @@ while (True):
   edges_weights = [x[2] for x in edges]
   print(edges_weights)
   sorted_indices = []
-  if graphType == MINIMAL_COVERING_TREE  or graphType == MAXIMUM_COVERING_TREE:
-    if graphType==MINIMAL_COVERING_TREE:
+  if action == MINIMAL_COVERING_TREE  or action == MAXIMUM_COVERING_TREE:
+    if action==MINIMAL_COVERING_TREE:
       sorted_indices = np.argsort(edges_weights)
-    elif graphType==MAXIMUM_COVERING_TREE:
+    elif action==MAXIMUM_COVERING_TREE:
       sorted_indices = np.argsort(edges_weights)[::-1]
 
     print("sorted indices : ", sorted_indices)
@@ -333,6 +352,10 @@ while (True):
     else:
       print("Such tree exists")
         
-    input("\nPress any key to continue...\n")
-  elif graphType == FORD_SHORTEST_PATH:
+
+  elif action == FORD_SHORTEST_PATH:
     pass
+  elif action == OUTPUT_MATRIX:
+    printMatrix(adjMatrix)
+  
+  input("\nPress any key to continue...\n")
