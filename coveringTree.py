@@ -14,6 +14,8 @@ MAXIMUM_ORIENTED_FOREST = 4
 MAXIMUM_ORIENTED_COVERING_TREE = 5
 MINIMAL_ORIENTED_COVERING_TREE = 6
 
+FORD_SHORTEST_PATH = 7
+
 
 MANUAL_INPUT_TYPE = 1
 MATRIX_INPUT_TYPE = 2
@@ -90,12 +92,16 @@ def sortAxis (a,b):
     return a,b
   return first_letter, second_letter
 
+def edgesToAdjMatrix():
+
+
 # Some variables for everything
 G = GraphVisualization() 
 rebra=[]
 rebra_colored=[]
 axisAmount=0
 amountOfRebra = 0
+adjacencyMatrix = []
 
 # USER INPUT
 inputType = int(input(f"Выберите тип ввода:\n "
@@ -147,7 +153,8 @@ while (True):
   ## graph type
   graphType = int(input(f"Какой граф нужно построить:\n "
                     f"{MINIMAL_COVERING_TREE}.Минимальное покрывающее дерево."
-                    f"\n{MAXIMUM_COVERING_TREE}.Максимальное покрывающее дерево.\n"))
+                    f"\n{MAXIMUM_COVERING_TREE}.Максимальное покрывающее дерево.\n"
+                    f"{FORD_SHORTEST_PATH}. Дерево кратчайших путей по Форду.\n"))
   # SORTING INDICES BY REBRA WEIGHT
   index = 0
   rebra_weights = [x[2] for x in rebra]
@@ -230,7 +237,4 @@ while (True):
       print("Such tree exists")
         
     input("\nPress any key to continue...\n")
-  
-  else:
-    match graphType:
-      case 
+  elif graphType == FORD_SHORTEST_PATH:
