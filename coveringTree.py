@@ -2,11 +2,22 @@ import numpy as np
 import networkx as nx 
 import matplotlib.pyplot as plt 
 
+# вершина = vertex / vertices
+# дуга = edge / edges
+
 MINIMAL_COVERING_TREE = 1
 MAXIMUM_COVERING_TREE = 2
 
+MINIMUM_ORIENTED_FOREST = 3
+MAXIMUM_ORIENTED_FOREST = 4
+
+MAXIMUM_ORIENTED_COVERING_TREE = 5
+MINIMAL_ORIENTED_COVERING_TREE = 6
+
+
 MANUAL_INPUT_TYPE = 1
 MATRIX_INPUT_TYPE = 2
+ORIENTED_MATRIX_INPUT_TYPE = 3
 
 #weird visualisation i might need
 # Defining a Class 
@@ -89,7 +100,8 @@ amountOfRebra = 0
 # USER INPUT
 inputType = int(input(f"Выберите тип ввода:\n "
              f"{MANUAL_INPUT_TYPE}. Ребра типа a b 10.\n "
-             f"{MATRIX_INPUT_TYPE}. Ребра по матрице смежности\n"))
+             f"{MATRIX_INPUT_TYPE}. Ребра по матрице смежности (неориетированный).\n"
+             f"{ORIENTED_MATRIX_INPUT_TYPE}. Ребра по матрице смежности (ориентированный).\n"))
 if inputType == MANUAL_INPUT_TYPE:
 ## axis amount
   axisAmount = int(input("Введите кол-во вершин: "))
@@ -116,6 +128,18 @@ elif inputType == MATRIX_INPUT_TYPE:
       axisTwo = axesTwoAndWeight[i] 
       weight_ = int(axesTwoAndWeight[i+1])
       rebra.append([axisOne,axisTwo,weight_])
+elif inputType == ORIENTED_MATRIX_INPUT_TYPE:
+    axes = input("Введите все вершины через пробел: a b c d ...").split()
+    axisAmount = len(axes)
+    axisIndex = 0
+    for axisOne in axes:
+      axesTwoAndWeight = input(f"Введите вершины которым {axisOne} смежна: (b 40 c 50 d 20) ").split()
+      axisIndex+=1
+      if axesTwoAndWeight == '': continue
+      for i in range(0,len(axesTwoAndWeight), 2):
+        axisTwo = axesTwoAndWeight[i] 
+        weight_ = int(axesTwoAndWeight[i+1])
+        rebra.append([axisOne,axisTwo,weight_])
 
 rebra_colored=rebra
 ## Main loop to build several graphs on one set of rebra
@@ -129,79 +153,84 @@ while (True):
   rebra_weights = [x[2] for x in rebra]
   print(rebra_weights)
   sorted_indices = []
-  if graphType==MINIMAL_COVERING_TREE:
-    sorted_indices = np.argsort(rebra_weights)
-  elif graphType==MAXIMUM_COVERING_TREE:
-    sorted_indices = np.argsort(rebra_weights)[::-1]
+  if graphType == MINIMAL_COVERING_TREE  or graphType == MAXIMUM_COVERING_TREE:
+    if graphType==MINIMAL_COVERING_TREE:
+      sorted_indices = np.argsort(rebra_weights)
+    elif graphType==MAXIMUM_COVERING_TREE:
+      sorted_indices = np.argsort(rebra_weights)[::-1]
 
-  print("sorted indices : ", sorted_indices)
+    print("sorted indices : ", sorted_indices)
 
-  output = []
-  buketi = []
-  curOutputLine=[]
-  weight = 0
-  # MAIN LOOP BUILDING GRAPH
-  
-  for i in sorted_indices:
-    if len(curOutputLine) > 0:
-      if len(curOutputLine[3]) == axisAmount:
-        break
-    axisOne = rebra[i][0]
-    axisTwo = rebra[i][1]
-    if axisOne == axisTwo: 
-      continue ## This shouldn't be a loop 
-    axisOne, axisTwo = sortAxis(axisOne, axisTwo)
-    buketAxisOne = -1
-    buketAxisTwo = -1
-    ## 0,                            1,   2,   3, 4
-    ## [вершина, вершина] - ребро, цвет, вес, б1, б2 ... 
-    curOutputLine = [[axisOne, axisTwo], "г", rebra[i][2]]
-    for buket_i in range(len(buketi)):
-      if (axisOne in buketi[buket_i]): buketAxisOne = buket_i
-      if (axisTwo in buketi[buket_i]): buketAxisTwo = buket_i
-    ## from same buket
-    if buketAxisOne == buketAxisTwo and buketAxisOne != -1:
-      curOutputLine[1] = "о"
-    ## none are from buket
-    elif buketAxisOne == -1 and buketAxisTwo == -1:
-      curOutputLine[1]="г"
-      buketi.append([axisOne, axisTwo]) # new buket created
-    ## axisOne in buket and axisTwo is not
-    elif buketAxisOne == -1 and buketAxisTwo != -1:
-      buketi[buketAxisTwo].append(axisOne)
-    ## axisTwo in buket and axisOne is not
-    elif buketAxisTwo == -1 and buketAxisOne != -1:
-      buketi[buketAxisOne].append(axisTwo)
-    ## they are both in different buket
-    elif axisOne != axisTwo:
-      ### MERGING TWO BUKETS
-      lowerIndexBuket = min(buketAxisOne, buketAxisTwo)
-      higherIndexBuket = max(buketAxisTwo, buketAxisOne)
-      for axis in buketi[higherIndexBuket]:
-        buketi[lowerIndexBuket].append(axis)
-      buketi.remove(buketi[higherIndexBuket]) # deleting this buket
+    output = []
+    buketi = []
+    curOutputLine=[]
+    weight = 0
+    # MAIN LOOP BUILDING GRAPH
     
-    for b in buketi:
-      curOutputLine.append(b)
-    ## OUTPUT OF CURRENT LINE 
-    print(f"{i+1} {curOutputLine}")
-
-    ## SUMMING WEIGHTS OF "г"
-    if curOutputLine[1] == "г":
-      weight+= curOutputLine[2]
-    
-    ## VISUALIZING
-    ### a,b, weight, color
-    G.addEdge(curOutputLine[0][0], curOutputLine[0][1], curOutputLine[2], curOutputLine[1])
-  # PRINT RESULTS
-  print(f"Weight: {weight}")
-
-  G.visualize()
-  
-  # PRINT IF IT WORKED
-  if len(curOutputLine[3]) != axisAmount:
-    print('Doesnt exist')
-  else:
-    print("Such tree exists")
+    for i in sorted_indices:
+      if len(curOutputLine) > 0:
+        if len(curOutputLine[3]) == axisAmount:
+          break
+      axisOne = rebra[i][0]
+      axisTwo = rebra[i][1]
+      if axisOne == axisTwo: 
+        continue ## This shouldn't be a loop 
+      axisOne, axisTwo = sortAxis(axisOne, axisTwo)
+      buketAxisOne = -1
+      buketAxisTwo = -1
+      ## 0,                            1,   2,   3, 4
+      ## [вершина, вершина] - ребро, цвет, вес, б1, б2 ... 
+      curOutputLine = [[axisOne, axisTwo], "г", rebra[i][2]]
+      for buket_i in range(len(buketi)):
+        if (axisOne in buketi[buket_i]): buketAxisOne = buket_i
+        if (axisTwo in buketi[buket_i]): buketAxisTwo = buket_i
+      ## from same buket
+      if buketAxisOne == buketAxisTwo and buketAxisOne != -1:
+        curOutputLine[1] = "о"
+      ## none are from buket
+      elif buketAxisOne == -1 and buketAxisTwo == -1:
+        curOutputLine[1]="г"
+        buketi.append([axisOne, axisTwo]) # new buket created
+      ## axisOne in buket and axisTwo is not
+      elif buketAxisOne == -1 and buketAxisTwo != -1:
+        buketi[buketAxisTwo].append(axisOne)
+      ## axisTwo in buket and axisOne is not
+      elif buketAxisTwo == -1 and buketAxisOne != -1:
+        buketi[buketAxisOne].append(axisTwo)
+      ## they are both in different buket
+      elif axisOne != axisTwo:
+        ### MERGING TWO BUKETS
+        lowerIndexBuket = min(buketAxisOne, buketAxisTwo)
+        higherIndexBuket = max(buketAxisTwo, buketAxisOne)
+        for axis in buketi[higherIndexBuket]:
+          buketi[lowerIndexBuket].append(axis)
+        buketi.remove(buketi[higherIndexBuket]) # deleting this buket
       
-  input("\nPress any key to continue...\n")
+      for b in buketi:
+        curOutputLine.append(b)
+      ## OUTPUT OF CURRENT LINE 
+      print(f"{i+1} {curOutputLine}")
+
+      ## SUMMING WEIGHTS OF "г"
+      if curOutputLine[1] == "г":
+        weight+= curOutputLine[2]
+      
+      ## VISUALIZING
+      ### a,b, weight, color
+      G.addEdge(curOutputLine[0][0], curOutputLine[0][1], curOutputLine[2], curOutputLine[1])
+    # PRINT RESULTS
+    print(f"Weight: {weight}")
+
+    G.visualize()
+    
+    # PRINT IF IT WORKED
+    if len(curOutputLine[3]) != axisAmount:
+      print('Doesnt exist')
+    else:
+      print("Such tree exists")
+        
+    input("\nPress any key to continue...\n")
+  
+  else:
+    match graphType:
+      case 
