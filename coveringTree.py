@@ -21,6 +21,9 @@ MANUAL_INPUT_TYPE = 1
 MATRIX_INPUT_TYPE = 2
 ORIENTED_MATRIX_INPUT_TYPE = 3
 
+LETTER_TO_INDEX = {}
+INDEX_TO_LETTER = {}
+
 #weird visualisation i might need
 # Defining a Class 
 class GraphVisualization: 
@@ -76,18 +79,35 @@ class GraphVisualization:
         plt.tight_layout()
         plt.show()
 
+def createLetterToIndexDict(vertices, isSorted = False):
+  if not isSorted:
+    vertices = sorted(vertices)
+  i = 0
+  for vertex in vertices:
+    LETTER_TO_INDEX[vertex] = i
+    i+=1
+def createIndexToLetter(vertices, isSorted = False):
+  if not isSorted:
+    vertices = sorted(vertices)
+  i = 0
+  for vertex in vertices:
+    INDEX_TO_LETTER[i] = vertex
+    i+=1
+
 # letter To Index
 def letterToIndex(letter): 
   # ord(char) returns ASCII of char
   # chr(num) returns char 
   # ASCII : a b c d e f g h i j k l m n o p q r s t u v w x y z 
-  return ord(letter.lower())-97 # because a is 97 => so a will be 0 , b 1 and etc. 
+  #return ord(letter.lower())-97 # because a is 97 => so a will be 0 , b 1 and etc. 
+  return LETTER_TO_INDEX[letter]
 # Index to letter
 def indexToLetter(index): 
   # ord(char) returns ASCII of char
   # chr(num) returns char 
   # ASCII : a b c d e f g h i j k l m n o p q r s t u v w x y z 
-  return chr(index+97) # because a is 97 => so a will be 0 , b 1 and etc. 
+  #return chr(index+97) # because a is 97 => so a will be 0 , b 1 and etc. 
+  return INDEX_TO_LETTER[index]
 # alphabetically
 def sortvertex (a,b):
   first_letter = ""
@@ -108,7 +128,7 @@ def sortEdges(edges):
   return sorted(sorted(sorted(edges, key= lambda x: x[0]), key=lambda x: x[1]), key=lambda x : x[2])
 def edgesToAdjMatrix(vertices, edges, isSorted = False):
   if not isSorted:
-    edges = sortEdges() # Safe redundancy
+    edges = sortEdges(edges) # Safe redundancy
     vertices=sorted(vertices)
   
   # the order of letter is in letterToIndex()
@@ -119,18 +139,24 @@ def edgesToAdjMatrix(vertices, edges, isSorted = False):
     vertexTwo = edge[1]
     weight = edge[2]
     adjMatrix[letterToIndex(vertexOne)][letterToIndex(vertexTwo)] = weight
+  return adjMatrix
     
-# ——————————————
-def printDashes(dashesAmount):
-  pass
 def printMatrix(adjMatrix, startingLetter=None, letterOrder=None):
   # the order of letter is in letterToIndex
+  maxNumLength = len(str(np.amax(adjMatrix)))
+  dashesMultiplier = maxNumLength + 1 # because we also have | symbol per each number and not number too
+  dashesChar = '—' * dashesMultiplier
+  def spacesChar(numLen):
+    return ' ' * (maxNumLength-numLen)
+  
+
+
   # Header:
-  headerStr = ' '
-  headerDashesStr = '—'
+  headerStr = spacesChar(0) + '|'
+  headerDashesStr = dashesChar
   for i in range(len(adjMatrix[0])):
-    headerStr += f"|{indexToLetter(i)}|"
-    headerDashesStr += '—'
+    headerStr += f"{indexToLetter(i)}{spacesChar(len(indexToLetter(i)))}|"
+    headerDashesStr += dashesChar
   print(headerStr)
   print(headerDashesStr)
 
@@ -139,11 +165,11 @@ def printMatrix(adjMatrix, startingLetter=None, letterOrder=None):
     pass # TODO: write first then exclude
   else:
     for i in range(len(adjMatrix)): # rows amount (строки)
-      outputStr = f'{indexToLetter(i)}|'
-      dashesStr = '—'
+      outputStr = f'{indexToLetter(i)}{spacesChar(len(indexToLetter(i)))}|'
+      dashesStr = dashesChar
       for j in range(len(adjMatrix[0])): #  columns amount (столбцы)
-        outputStr += f'{adjMatrix[i][j]}|'
-        dashesStr += '—'
+        outputStr += f'{adjMatrix[i][j]}{spacesChar(len(str(adjMatrix[i][j])))}|'
+        dashesStr += dashesChar
       print(outputStr)
       print(dashesStr)
 
@@ -157,9 +183,13 @@ edges_colored=[]
 vertexAmount=0
 amountOfedges = 0
 adjacencyMatrix = []
-vertices_ = ['a','b','r','c']
-edges_ = [['b', 'a', '50'], ['a', 'r', '1'], ['c', 'a', '3']]
-printMatrix(edgesToAdjMatrix())
+vertices_ = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'f', 'g', 'h', 'k', 's', 'm', 'n', 't']
+edges_ = [['b', 'a', 529], ['a', 's', 1], ['c', 'a', 3]]
+
+createLetterToIndexDict(vertices_)
+createIndexToLetter(vertices_)
+
+printMatrix(edgesToAdjMatrix(vertices_, edges_))
 
 # USER INPUT
 inputType = int(input(f"Выберите тип ввода:\n "
@@ -205,8 +235,15 @@ elif inputType == ORIENTED_MATRIX_INPUT_TYPE:
         weight_ = int(verticesTwoAndWeight[i+1])
         edges.append([vertexOne,vertexTwo,weight_])
 
+# FORMATTING DATA BEFORE DOING ANYTHING AS IT IS EXPECTED TO BE
 edges_colored=edges
 edges = sortEdges(edges)
+vertices = sorted(vertices)
+# Deleting duplicates
+vertices = list(set(vertices)) 
+
+createIndexToLetter(vertices)
+createLetterToIndexDict(vertices)
 
 ## Main loop to build several graphs on one set of edges
 while (True):
