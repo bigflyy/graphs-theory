@@ -16,7 +16,7 @@ class Graph:
   LETTER_TO_INDEX = {}
   INDEX_TO_LETTER = {}
   ORIGINAL_STDOUT = sys.stdout
-  EMPTY_MATRIX_SYMBOL = math.inf
+  EMPTY_MATRIX_ITEM_SYMBOL = math.inf # how it is stored in matrix itself
   TXT_FOLDER = "TXTS/"
   def createLetterToIndexDict(vertices, isSorted = False):
     if not isSorted:
@@ -72,7 +72,7 @@ class Graph:
     
     # the order of letter is in letterToIndex()
     cols_count = rows_count = len(vertices)
-    adjMatrix = [[Graph.EMPTY_MATRIX_SYMBOL for x in range(cols_count)] for x in range(rows_count)] 
+    adjMatrix = [[Graph.EMPTY_MATRIX_ITEM_SYMBOL for x in range(cols_count)] for x in range(rows_count)] 
     for edge in edges:
       vertexOne = edge[0]
       vertexTwo = edge[1]
@@ -94,7 +94,38 @@ class Graph:
       weight = edge[2]
       adjMatrix[vertexOne][vertexTwo] = weight
     return adjMatrix
+  
+  def appendMatrixD(matrix, rowsToAppend = None, columnsToAppend =None): 
+    # add column or row to any matrix
+    # it is assumed that added row or column has a name of it as a first element 
+    matrix_rows = []
+    matrix_columns =[]
 
+    sets = list(matrix)
+    vertices = []
+    for o in sets:
+      if (list(o)[0] not in matrix_rows): matrix_rows.append(list(o)[0])
+      if (list(o)[1] not in matrix_columns): matrix_columns.append(list(o)[1])
+    if rowsToAppend !=None:
+      for i in range(rowsToAppend):
+        # the first element of this row
+        rowName = rowsToAppend[i][0] 
+        # current row we are iterating thru
+        row = rowsToAppend[i] 
+        # except 1st (index 0) element because it is name
+        for j in range(1,len(rowsToAppend[i])): 
+          # j-1 because j goes 1, 2 ... and we need from first column
+          matrix[rowName, matrix_columns[j-1]] = row[j] 
+    if columnsToAppend != None:
+      for i in range(columnsToAppend):
+        # the first element of this row
+        columnName = columnsToAppend[i][0] 
+        # current row we are iterating thru
+        column = columnsToAppend[i] 
+        # except 1st (index 0) element because it is name
+        for j in range(1,len(columnsToAppend[i])): 
+          # j-1 because j goes 1, 2 ... and we need from first column
+          matrix[matrix_rows[j-1], columnName] = column[j] 
   def edgesToAdjMatrixDict(vertices, edges, isSorted = False):
     if not isSorted:
       edges = Graph.sortEdges(edges) # Safe redundancy
@@ -106,7 +137,7 @@ class Graph:
     # Initialize adjMatrixDict:
     for v1 in vertices:
       for v2 in vertices:
-        adjMatrix[v1,v2] = Graph.EMPTY_MATRIX_SYMBOL
+        adjMatrix[v1,v2] = Graph.EMPTY_MATRIX_ITEM_SYMBOL
     for edge in edges:
       vertexOne = edge[0]
       vertexTwo = edge[1]
@@ -114,7 +145,7 @@ class Graph:
       adjMatrix[vertexOne, vertexTwo] = weight
     return adjMatrix
 
-  def printMatrix(adjMatrix, startingLetter=None, letterOrder=None):
+  def printMatrix(adjMatrix, startingLetter=None, letterOrder=None, emptySymbol=''):
     # the order of letter is in letterToIndex
     rowsAmount = len(adjMatrix)
     columnsAmount = len(adjMatrix[0])
@@ -143,12 +174,16 @@ class Graph:
         outputStr = f'{Graph.indexToLetter(i)}{spacesChar(len(Graph.indexToLetter(i)))}|'
         dashesStr = dashesChar
         for j in range(columnsAmount): #  columns amount (столбцы)
-          outputStr += f'{adjMatrix[i][j]}{spacesChar(len(str(adjMatrix[i][j])))}|'
+          adjMatrixValue = adjMatrix[i][j] 
+          # To avoid ugly infs
+          if adjMatrixValue == math.inf: adjMatrixValue = emptySymbol
+
+          outputStr += f'{adjMatrixValue}{spacesChar(len(str(adjMatrixValue)))}|'
           dashesStr += dashesChar
         print(outputStr)
         print(dashesStr)
 
-  def printMatrixDict(adjMatrix, startingLetter=None, letterOrder=None):
+  def printMatrixDict(adjMatrix, startingLetter=None, letterOrder=None, emptySymbol = ''):
     sets = list(adjMatrix)
     vertices = []
     for o in sets:
@@ -182,21 +217,21 @@ class Graph:
         dashesStr = dashesChar
         for j in vertices: 
           adjMatrixValue = adjMatrix[i,j]
-          if adjMatrixValue == math.inf: adjMatrixValue = '' # so it wouldnt look so messy
+          if adjMatrixValue == math.inf: adjMatrixValue = emptySymbol # so it wouldnt look so messy
           outputStr += f'{adjMatrixValue}{spacesChar(len(str(adjMatrixValue)))}|'
           dashesStr += dashesChar
         print(outputStr)
         print(dashesStr)
 
   def printMatrixToFile(adjMatrix):
-    fileName = f"{Graph.SAME_SECOND_NUM}adjMatrix-" + datetime.today().strftime('%Y-%m-%d-%H:%M:%S') +".txt"
+    fileName = f"{Graph.TXT_FOLDER}{Graph.SAME_SECOND_NUM}adjMatrix-" + datetime.today().strftime('%Y-%m-%d-%H:%M:%S') +".txt"
     with open(fileName, 'w') as f:
       sys.stdout = f
       Graph.printMatrix(adjMatrix)
       sys.stdout = Graph.ORIGINAL_STDOUT
     Graph.SAME_SECOND_NUM+=1
   def printMatrixDictToFile(adjMatrix):
-    fileName = f"{Graph.SAME_SECOND_NUM}adjMatrix-" + datetime.today().strftime('%Y-%m-%d-%H:%M:%S') +".txt"
+    fileName = f"{Graph.TXT_FOLDER}{Graph.SAME_SECOND_NUM}adjMatrix-" + datetime.today().strftime('%Y-%m-%d-%H:%M:%S') +".txt"
     with open(fileName, 'w') as f:
       sys.stdout = f
       Graph.printMatrixDict(adjMatrix)
@@ -224,13 +259,13 @@ class Graph:
   #   with open(TXT_FOLDER + FILE_NAME, 'w') as outfile:
   #       json.dump(adjMatrix, outfile)
   def exportEdges(edges):
-    FILE_NAME = f"{Graph.SAME_SECOND_NUM}edges-" + datetime.today().strftime('%Y-%m-%d-%H:%M:%S') +".txt"
+    FILE_NAME = f"{Graph.TXT_FOLDER}{Graph.SAME_SECOND_NUM}edges-" + datetime.today().strftime('%Y-%m-%d-%H:%M:%S') +".txt"
     # dump the dict contents using json 
     with open(FILE_NAME, 'w') as outfile:
         json.dump(edges, outfile)
     Graph.SAME_SECOND_NUM+=1
   def exportVertices(vertices):
-    FILE_NAME = f"{Graph.SAME_SECOND_NUM}vertices-" + datetime.today().strftime('%Y-%m-%d-%H:%M:%S') +".txt"
+    FILE_NAME = f"{Graph.TXT_FOLDER}{Graph.SAME_SECOND_NUM}vertices-" + datetime.today().strftime('%Y-%m-%d-%H:%M:%S') +".txt"
     # dump the dict contents using json 
     with open(FILE_NAME, 'w') as outfile:
         json.dump(vertices, outfile)
