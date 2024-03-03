@@ -95,37 +95,61 @@ class Graph:
       adjMatrix[vertexOne][vertexTwo] = weight
     return adjMatrix
   
-  def appendMatrixD(matrix, rowsToAppend = None, columnsToAppend =None): 
+  def createMatrixD(rows = None, columns = None, rowsNames=[], columnsNames=[]):
+    # They are different to Adj matrices, because they are произвольные
+    matrix = {}
+    Graph.appendMatrixD(matrix, rowsToAppend=rows, columnsToAppend=columns, columnsNames=columnsNames, rowsNames=rowsNames)
+    return matrix
+  def appendMatrixD(matrix, rowsToAppend = None, columnsToAppend =None, columnsNames=[], rowsNames=[]): 
     # add column or row to any matrix
     # it is assumed that added row or column has a name of it as a first element 
-    matrix_rows = []
-    matrix_columns =[]
 
     sets = list(matrix)
     vertices = []
     for o in sets:
-      if (list(o)[0] not in matrix_rows): matrix_rows.append(list(o)[0])
-      if (list(o)[1] not in matrix_columns): matrix_columns.append(list(o)[1])
-    if rowsToAppend !=None:
-      for i in range(rowsToAppend):
-        # the first element of this row
-        rowName = rowsToAppend[i][0] 
-        # current row we are iterating thru
-        row = rowsToAppend[i] 
-        # except 1st (index 0) element because it is name
-        for j in range(1,len(rowsToAppend[i])): 
-          # j-1 because j goes 1, 2 ... and we need from first column
-          matrix[rowName, matrix_columns[j-1]] = row[j] 
-    if columnsToAppend != None:
-      for i in range(columnsToAppend):
-        # the first element of this row
-        columnName = columnsToAppend[i][0] 
-        # current row we are iterating thru
-        column = columnsToAppend[i] 
-        # except 1st (index 0) element because it is name
-        for j in range(1,len(columnsToAppend[i])): 
-          # j-1 because j goes 1, 2 ... and we need from first column
-          matrix[matrix_rows[j-1], columnName] = column[j] 
+      if (list(o)[0] not in rowsNames): rowsNames.append(list(o)[0])
+      if (list(o)[1] not in columnsNames): columnsNames.append(list(o)[1])
+    if rowsToAppend != None and columnsToAppend != None:
+      for i in range(len(rowsToAppend)):
+          # the first element of this row
+          rowName = rowsToAppend[i][0] 
+          # current row we are iterating thru
+          row = rowsToAppend[i] 
+          # except 1st (index 0) element because it is name
+          for j in range(1,len(rowsToAppend[i])): 
+            # we are going thru every column first variables which is its name
+            matrix[rowName, columnsToAppend[j-1][0]] = row[j] 
+      for i in range(len(columnsToAppend)):
+          # the first element of this row
+          columnName = columnsToAppend[i][0] 
+          # current row we are iterating thru
+          column = columnsToAppend[i] 
+          # except 1st (index 0) element because it is name
+          for j in range(1,len(columnsToAppend[i])): 
+            # j-1 because j goes 1, 2 ... and we need from first column
+            matrix[rowsToAppend[j-1][0], columnName] = column[j] 
+
+    else:
+      if rowsToAppend !=None:
+        for i in range(len(rowsToAppend)):
+          # the first element of this row
+          rowName = rowsToAppend[i][0] 
+          # current row we are iterating thru
+          row = rowsToAppend[i] 
+          # except 1st (index 0) element because it is name
+          for j in range(1,len(rowsToAppend[i])): 
+            # j-1 because j goes 1, 2 ... and we need from first column
+            matrix[rowName, columnsNames[j-1]] = row[j] 
+      if columnsToAppend != None:
+        for i in range(len(columnsToAppend)):
+          # the first element of this row
+          columnName = columnsToAppend[i][0] 
+          # current row we are iterating thru
+          column = columnsToAppend[i] 
+          # except 1st (index 0) element because it is name
+          for j in range(1,len(columnsToAppend[i])): 
+            # j-1 because j goes 1, 2 ... and we need from first column
+            matrix[rowsNames[j-1], columnName] = column[j] 
   def edgesToAdjMatrixDict(vertices, edges, isSorted = False):
     if not isSorted:
       edges = Graph.sortEdges(edges) # Safe redundancy
@@ -184,11 +208,15 @@ class Graph:
         print(dashesStr)
 
   def printMatrixDict(adjMatrix, startingLetter=None, letterOrder=None, emptySymbol = ''):
+    # !!! adjMatrix sets should be sorted 
     sets = list(adjMatrix)
-    vertices = []
+    rowVertices = []
+    columnVertices = []
     for o in sets:
-      if (list(o)[0] not in vertices): vertices.append(list(o)[0])
-      if (list(o)[1] not in vertices): vertices.append(list(o)[1])
+      if (list(o)[0] not in rowVertices): rowVertices.append(list(o)[0])
+      if (list(o)[1] not in columnVertices): columnVertices.append(list(o)[1])
+    rowsAmount = len(rowVertices)
+    columnsAmount = len(columnVertices)
     # to find the number after infinity
     val = list(set(list(adjMatrix.values())))
     val.sort()
@@ -202,7 +230,7 @@ class Graph:
     # Header:
     headerStr = spacesChar(0) + '|'
     headerDashesStr = dashesChar
-    for i in vertices:
+    for i in columnVertices:
       headerStr += f"{i}{spacesChar(len(i))}|"
       headerDashesStr += dashesChar
     print(headerStr)
@@ -212,10 +240,10 @@ class Graph:
     if startingLetter != None:
       pass # TODO: write first then exclude
     else:
-      for i in vertices: 
+      for i in rowVertices: 
         outputStr = f'{i}{spacesChar(len(i))}|'
         dashesStr = dashesChar
-        for j in vertices: 
+        for j in columnVertices: 
           adjMatrixValue = adjMatrix[i,j]
           if adjMatrixValue == math.inf: adjMatrixValue = emptySymbol # so it wouldnt look so messy
           outputStr += f'{adjMatrixValue}{spacesChar(len(str(adjMatrixValue)))}|'

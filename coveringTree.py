@@ -83,17 +83,22 @@ adjacencyMatrix = []
 vertices_ = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'f', 'g', 'h', 'k', 's', 'm', 'n', 't']
 edges_ = [['b', 'a', 529], ['a', 's', 1], ['c', 'a', 3]]
 
+rows = [['a', 5, 6, 7, 8], ['b', 6, 6, 6, 6]]
+matrix_columns=['a','b','c','d']
+matrix = G.createMatrixD(rows=rows, columnsNames=matrix_columns)
+G.printMatrixDict(matrix)
+
 G.createLetterToIndexDict(vertices_)
 G.createIndexToLetter(vertices_)
 
 #printMatrix(edgesToAdjMatrix(vertices_, edges_))
-#printMatrixDict(edgesToAdjMatrixDict(vertices_, edges_))
-G.exportEdges(edges_)
-G.exportVertices(vertices_)
+G.printMatrixDict(G.edgesToAdjMatrixDict(vertices_, edges_))
+# G.exportEdges(edges_)
+# G.exportVertices(vertices_)
 adjMatrixDict = G.edgesToAdjMatrixDict(vertices_, edges_)
 adjMatrix = G.edgesToAdjMatrix(vertices_, edges_)
-G.printMatrixToFile(adjMatrix)
-G.printMatrixDictToFile(adjMatrixDict)
+# G.printMatrixToFile(adjMatrix)
+# G.printMatrixDictToFile(adjMatrixDict)
 vertices__ = []
 edges__ = []
 
