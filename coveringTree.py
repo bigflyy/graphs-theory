@@ -1,9 +1,16 @@
 import numpy as np
 import networkx as nx 
 import matplotlib.pyplot as plt 
+import json
+from datetime import datetime
+from collections import defaultdict
+import math
 
 # вершина = vertex / vertices
 # дуга = edge / edges
+
+TXT_FOLDER = "~repos/graphs-theory/"
+EMPTY_MATRIX_SYMBOL = math.inf
 
 OUTPUT_MATRIX = 0
 
@@ -83,6 +90,12 @@ class GraphVisualization:
         plt.tight_layout()
         plt.show()
 
+def nested_dict(n, type):
+    if n == 1:
+        return defaultdict(type)
+    else:
+        return defaultdict(lambda: nested_dict(n-1, type))
+
 def createLetterToIndexDict(vertices, isSorted = False):
   if not isSorted:
     vertices = sorted(vertices)
@@ -137,23 +150,59 @@ def edgesToAdjMatrix(vertices, edges, isSorted = False):
   
   # the order of letter is in letterToIndex()
   cols_count = rows_count = len(vertices)
-  adjMatrix = [[0 for x in range(cols_count)] for x in range(rows_count)] 
+  adjMatrix = [[EMPTY_MATRIX_SYMBOL for x in range(cols_count)] for x in range(rows_count)] 
   for edge in edges:
     vertexOne = edge[0]
     vertexTwo = edge[1]
     weight = edge[2]
     adjMatrix[letterToIndex(vertexOne)][letterToIndex(vertexTwo)] = weight
   return adjMatrix
-    
+
+def edgesToAdjMatrixNestedDict(vertices, edges, isSorted = False):
+  if not isSorted:
+    edges = sortEdges(edges) # Safe redundancy
+    vertices=sorted(vertices)
+  
+  # the order of letter is in letterToIndex()
+  cols_count = rows_count = len(vertices)
+  adjMatrix = nested_dict(2, int)
+  for edge in edges:
+    vertexOne = edge[0]
+    vertexTwo = edge[1]
+    weight = edge[2]
+    adjMatrix[vertexOne][vertexTwo] = weight
+  return adjMatrix
+
+def edgesToAdjMatrixDict(vertices, edges, isSorted = False):
+  if not isSorted:
+    edges = sortEdges(edges) # Safe redundancy
+    vertices=sorted(vertices)
+  
+  # the order of letter is in letterToIndex()
+  cols_count = rows_count = len(vertices)
+  adjMatrix = {}
+  # Initialize adjMatrixDict:
+  for v1 in vertices:
+    for v2 in vertices:
+      adjMatrix[v1,v2] = EMPTY_MATRIX_SYMBOL
+  for edge in edges:
+    vertexOne = edge[0]
+    vertexTwo = edge[1]
+    weight = edge[2]
+    adjMatrix[vertexOne, vertexTwo] = weight
+  return adjMatrix
+
 def printMatrix(adjMatrix, startingLetter=None, letterOrder=None):
   # the order of letter is in letterToIndex
+  rowsAmount = len(adjMatrix)
+  columnsAmount = len(adjMatrix[0])
+
   maxNumLength = len(str(np.amax(adjMatrix)))
   dashesMultiplier = maxNumLength + 1 # because we also have | symbol per each number and not number too
   dashesChar = '—' * dashesMultiplier
   def spacesChar(numLen):
     return ' ' * (maxNumLength-numLen)
   
-
 
   # Header:
   headerStr = spacesChar(0) + '|'
@@ -168,15 +217,54 @@ def printMatrix(adjMatrix, startingLetter=None, letterOrder=None):
   if startingLetter != None:
     pass # TODO: write first then exclude
   else:
-    for i in range(len(adjMatrix)): # rows amount (строки)
+    for i in range(rowsAmount): # rows amount (строки)
       outputStr = f'{indexToLetter(i)}{spacesChar(len(indexToLetter(i)))}|'
       dashesStr = dashesChar
-      for j in range(len(adjMatrix[0])): #  columns amount (столбцы)
+      for j in range(columnsAmount): #  columns amount (столбцы)
         outputStr += f'{adjMatrix[i][j]}{spacesChar(len(str(adjMatrix[i][j])))}|'
         dashesStr += dashesChar
       print(outputStr)
       print(dashesStr)
 
+def printMatrixDict(adjMatrix, startingLetter=None, letterOrder=None):
+  sets = list(adjMatrix)
+  vertices = []
+  for o in sets:
+    if (list(o)[0] not in vertices): vertices.append(list(o)[0])
+    if (list(o)[1] not in vertices): vertices.append(list(o)[1])
+  # to find the number after infinity
+  val = list(set(list(adjMatrix.values())))
+  val.sort()
+  maxNumLength = len(str(val[-2]))
+  dashesMultiplier = maxNumLength + 1 # because we also have | symbol per each number and not number too
+  dashesChar = '—' * dashesMultiplier
+  def spacesChar(numLen):
+    return ' ' * (maxNumLength-numLen)
+  
+
+  # Header:
+  headerStr = spacesChar(0) + '|'
+  headerDashesStr = dashesChar
+  for i in vertices:
+    headerStr += f"{i}{spacesChar(len(i))}|"
+    headerDashesStr += dashesChar
+  print(headerStr)
+  print(headerDashesStr)
+
+
+  if startingLetter != None:
+    pass # TODO: write first then exclude
+  else:
+    for i in vertices: 
+      outputStr = f'{i}{spacesChar(len(i))}|'
+      dashesStr = dashesChar
+      for j in vertices: 
+        adjMatrixValue = adjMatrix[i,j]
+        if adjMatrixValue == math.inf: adjMatrixValue = '' # so it wouldnt look so messy
+        outputStr += f'{adjMatrixValue}{spacesChar(len(str(adjMatrixValue)))}|'
+        dashesStr += dashesChar
+      print(outputStr)
+      print(dashesStr)
 
 def printMatrixToFile():
   pass
@@ -186,13 +274,17 @@ def importEdges():
   pass
 def importVertices():
   pass
-def exportAdjMatrix():
-  pass  
+def exportAdjMatrix(adjMatrix):
+  FILE_NAME = "adjMatrix" + datetime.today().strftime('%Y-%m-%d %H:%M:%S') +".txt"
+  # dump the dict contents using json 
+  with open(TXT_FOLDER + FILE_NAME, 'w') as outfile:
+      json.dump(adjMatrix, outfile)
 def exportEdges():
   pass
 def exportVertices():
   pass
-
+def drawAnyGraph():
+  pass
 
 # Some variables for everything
 G = GraphVisualization() 
@@ -201,13 +293,14 @@ edges_colored=[]
 vertexAmount=0
 amountOfedges = 0
 adjacencyMatrix = []
-vertices_ = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'f', 'g', 'h', 'k', 's', 'm', 'n', 't']
-edges_ = [['b', 'a', 529], ['a', 's', 1], ['c', 'a', 3]]
+# vertices_ = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'f', 'g', 'h', 'k', 's', 'm', 'n', 't']
+# edges_ = [['b', 'a', 529], ['a', 's', 1], ['c', 'a', 3]]
 
-createLetterToIndexDict(vertices_)
-createIndexToLetter(vertices_)
+# createLetterToIndexDict(vertices_)
+# createIndexToLetter(vertices_)
 
-printMatrix(edgesToAdjMatrix(vertices_, edges_))
+# #printMatrix(edgesToAdjMatrix(vertices_, edges_))
+# printMatrixDict(edgesToAdjMatrixDict(vertices_, edges_))
 
 # USER INPUT
 inputType = int(input(f"Выберите тип ввода:\n "
