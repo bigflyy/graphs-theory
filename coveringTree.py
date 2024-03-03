@@ -8,7 +8,7 @@ import math
 import sys
 
 #### My files
-from Matrices import Matrices as M
+from Graph import Graph as G
 from CONSTS import *
 
 # вершина = vertex / vertices
@@ -33,35 +33,35 @@ class GraphVisualization:
         temp = [a, b, weight, color] 
         self.visual.append(temp) 
           
-    # In visualize function G is an object of 
-    # class Graph given by networkx G.add_edges_from(visual) 
+    # In visualize function GV is an object of 
+    # class Graph given by networkx GV.add_edges_from(visual) 
     # creates a graph with a given list 
-    # nx.draw_networkx(G) - plots the graph 
+    # nx.draw_networkx(GV) - plots the graph 
     # plt.show() - displays the graph 
     def visualize(self): 
-        G = nx.Graph() 
+        GV = nx.Graph() 
 
         for edge in self.visual:
-          G.add_edge(edge[0], edge[1], weight=edge[2], color=edge[3])
+          GV.add_edge(edge[0], edge[1], weight=edge[2], color=edge[3])
 
         # u - first v - second, d - data ??
-        blue = [(u, v) for (u, v, d) in G.edges(data=True) if d["color"] == "г"]
-        orange = [(u, v) for (u, v, d) in G.edges(data=True) if d["color"] == "о"]
+        blue = [(u, v) for (u, v, d) in GV.edges(data=True) if d["color"] == "г"]
+        orange = [(u, v) for (u, v, d) in GV.edges(data=True) if d["color"] == "о"]
 
-        pos = nx.spring_layout(G, seed=7)  # positions for all nodes - seed for reproducibility
+        pos = nx.spring_layout(GV, seed=7)  # positions for all nodes - seed for reproducibility
         # nodes
-        nx.draw_networkx_nodes(G, pos, node_size=700)
+        nx.draw_networkx_nodes(GV, pos, node_size=700)
 
         # edges
-        nx.draw_networkx_edges(G, pos, edgelist=blue, width=6, edge_color="b")
+        nx.draw_networkx_edges(GV, pos, edgelist=blue, width=6, edge_color="b")
         nx.draw_networkx_edges(
-        G, pos, edgelist=orange, width=6, edge_color="r")
+        GV, pos, edgelist=orange, width=6, edge_color="r")
 
         # node labels
-        nx.draw_networkx_labels(G, pos, font_size=20, font_family="sans-serif")
+        nx.draw_networkx_labels(GV, pos, font_size=20, font_family="sans-serif")
         # edge weight labels
-        edge_labels = nx.get_edge_attributes(G, "weight")
-        nx.draw_networkx_edge_labels(G, pos, edge_labels)
+        edge_labels = nx.get_edge_attributes(GV, "weight")
+        nx.draw_networkx_edge_labels(GV, pos, edge_labels)
 
 
 
@@ -74,7 +74,7 @@ class GraphVisualization:
 
 
 # Some variables for everything
-G = GraphVisualization() 
+GV = GraphVisualization() 
 edges=[]            # [[vertexOne, vertexTwo, Weight, color], ...]
 edges_colored=[]
 vertexAmount=0
@@ -83,17 +83,17 @@ adjacencyMatrix = []
 vertices_ = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'f', 'g', 'h', 'k', 's', 'm', 'n', 't']
 edges_ = [['b', 'a', 529], ['a', 's', 1], ['c', 'a', 3]]
 
-M.createLetterToIndexDict(vertices_)
-M.createIndexToLetter(vertices_)
+G.createLetterToIndexDict(vertices_)
+G.createIndexToLetter(vertices_)
 
 #printMatrix(edgesToAdjMatrix(vertices_, edges_))
 #printMatrixDict(edgesToAdjMatrixDict(vertices_, edges_))
-M.exportEdges(edges_)
-M.exportVertices(vertices_)
-adjMatrixDict = M.edgesToAdjMatrixDict(vertices_, edges_)
-adjMatrix = M.edgesToAdjMatrix(vertices_, edges_)
-M.printMatrixToFile(adjMatrix)
-M.printMatrixDictToFile(adjMatrixDict)
+G.exportEdges(edges_)
+G.exportVertices(vertices_)
+adjMatrixDict = G.edgesToAdjMatrixDict(vertices_, edges_)
+adjMatrix = G.edgesToAdjMatrix(vertices_, edges_)
+G.printMatrixToFile(adjMatrix)
+G.printMatrixDictToFile(adjMatrixDict)
 vertices__ = []
 edges__ = []
 
@@ -139,17 +139,17 @@ elif inputType == ORIENTED_MATRIX_INPUT_TYPE:
         weight_ = int(verticesTwoAndWeight[i+1])
         edges.append([vertexOne,vertexTwo,weight_])
 elif inputType == IMPORT_TXT_INPUT_TYPE:
-  importAdjMatrix(adjMatrix)
+  G.importAdjMatrix(adjMatrix)
 # FORMATTING DATA BEFORE DOING ANYTHING AS IT IS EXPECTED TO BE
 edges_colored=edges
-edges = sortEdges(edges)
+edges = G.sortEdges(edges)
 vertices = sorted(vertices)
 # Deleting duplicates
 vertices = list(set(vertices)) 
 
-createIndexToLetter(vertices)
-createLetterToIndexDict(vertices)
-adjMatrix = edgesToAdjMatrix(vertices, edges)
+G.createIndexToLetter(vertices)
+G.createLetterToIndexDict(vertices)
+adjMatrix = G.edgesToAdjMatrix(vertices, edges)
 
 
 
@@ -230,11 +230,11 @@ while (True):
       
       ## VISUALIZING
       ### a,b, weight, color
-      G.addEdge(curOutputLine[0][0], curOutputLine[0][1], curOutputLine[2], curOutputLine[1])
+      GV.addEdge(curOutputLine[0][0], curOutputLine[0][1], curOutputLine[2], curOutputLine[1])
     # PRINT RESULTS
     print(f"Weight: {weight}")
 
-    G.visualize()
+    GV.visualize()
     
     # PRINT IF IT WORKED
     if len(curOutputLine[3]) != vertexAmount:
