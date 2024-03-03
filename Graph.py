@@ -68,8 +68,8 @@ class Graph:
       return a,b
     return first_letter, second_letter
   def sortEdges(edges):
-    # First sorted by first vertex letter, then by second, then by weight 
-    return sorted(sorted(sorted(edges, key= lambda x: x[0]), key=lambda x: x[1]), key=lambda x : x[2])
+    # First sorted by first vertex letter
+    return sorted(edges, key= lambda x: x[0])
   def edgesToAdjMatrix(vertices, edges, isSorted = False):
     if not isSorted:
       edges = Graph.sortEdges(edges) # Safe redundancy
@@ -102,41 +102,120 @@ class Graph:
   
   def createMatrixD(rows = None, columns = None, rowsNames=[], columnsNames=[]):
     # They are different to Adj matrices, because they are произвольные
+    if len(rowsNames) == 0 and len(columnsNames==0):
+      raise("When creating matrix you have to pass rowsNames / columnsNames.")
     matrix = {}
     Graph.appendMatrixD(matrix, rowsToAppend=rows, columnsToAppend=columns, columnsNames=columnsNames, rowsNames=rowsNames)
     return matrix
-  def getMatrixRow(matrix, i):
+  def getMatrixRow(matrix, rowName):
     row = []
-    columnNames = []
-    sets = list(matrix)
-    for o in sets:
-      if (list(o)[0] not in columnNames): columnNames.append(list(o)[1])
+    columnNames = Graph.getMatrixColumnNames(matrix)
+
     
     for j in range (len(columnNames)):
-      row.append(matrix[i, j])
+      row.append(matrix[rowName, columnNames[j]])
     return row
     
     
-  def getMatrixColumn(matrix, j):
+  def getMatrixColumn(matrix, columnName):
     column = []
+    rowsNames = Graph.getMatrixRowNames(matrix)
+    
+    for i in range (len(rowsNames)):
+      column.append(matrix[rowsNames[i], columnName])
+    return column
+  
+  def getRowNameOfMaxInColumn(matrix, columnName):
+    column = Graph.getMatrixColumn(matrix, columnName)
+    onlyIntColumn=[]
+    for c in column:
+      if type(c) != type(1) or type(c) == type(math.inf):
+        continue
+      else:
+        onlyIntColumn.append(c)
+    if len(onlyIntColumn) != 0:
+      maxIndex = column.index(max(onlyIntColumn))
+      return Graph.getMatrixRowNames(matrix)[maxIndex]
+    else:
+      return None
+
+  def getRowNameOfMinInColumn(matrix, columnName):
+    column = Graph.getMatrixColumn(matrix, columnName)
+    onlyIntColumn=[]
+    for c in column:
+      if type(c) != type(1) or type(c) == type(math.inf):
+        continue
+      else:
+        onlyIntColumn.append(c)
+    if len(onlyIntColumn) != 0:
+      maxIndex = column.index(min(onlyIntColumn))
+      return Graph.getMatrixRowNames(matrix)[maxIndex]
+    else:
+      return None
+
+  def getColumnNameOfMaxInRow(matrix, rowName):
+    row = Graph.getMatrixRow(matrix, rowName)
+    onlyIntRow =[]
+    for c in row:
+      if type(c) != type(1) or type(c) == type(math.inf):
+        continue
+      else:
+        onlyIntRow.append(c)
+    if (len(onlyIntRow) != 0):
+      maxIndex = row.index(max(onlyIntRow))
+      return Graph.getMatrixColumnNames(matrix)[maxIndex]
+    else:
+      return None
+
+  def getColumnNameOfMinInRow(matrix, rowName):
+    row = Graph.getMatrixRow(matrix, rowName)
+    onlyIntRow =[]
+    for c in row:
+      if type(c) != type(1) or type(c) == type(math.inf):
+        continue
+      else:
+        onlyIntRow.append(c)
+    if (len(onlyIntRow) != 0):
+      maxIndex = row.index(min(onlyIntRow))
+      return Graph.getMatrixColumnNames(matrix)[maxIndex]
+    else:
+      return None
+  def getLastNum(rowOrColumnArray):
+    # from 8 to 0 inclusive with a step of -1
+    for i in range(len(rowOrColumnArray)-1, -1, -1):
+      if i == '-' or i == '/' or i == Graph.EMPTY_MATRIX_ITEM_SYMBOL:
+        continue
+      else:
+        return i
+
+
+  def getMatrixColumnNames(matrix):
+    columnNames = []
+    sets = list(matrix)
+    for o in sets:
+      if (list(o)[1] not in columnNames): columnNames.append(list(o)[1])
+    return columnNames
+  def getMatrixRowNames(matrix):
     rowsNames = []
     sets = list(matrix)
     for o in sets:
       if (list(o)[0] not in rowsNames): rowsNames.append(list(o)[0])
-    
-    for i in range (len(rowsNames)):
-      column.append(matrix[i, j])
-    return column
+    return rowsNames
     
     
-  def appendMatrixD(matrix, rowsToAppend = None, columnsToAppend =None, columnsNames=[], rowsNames=[]): 
+  def appendMatrixD(matrix, rowsToAppend = None, columnsToAppend =None, columnsNames=None, rowsNames=None): 
+    # YOU HAVE TO PASS ROWS/COLUMNS NAME WHEN CREATING
+    if(rowsNames == None):rowsNames=Graph.getMatrixRowNames(matrix) 
+    if(columnsNames==None): columnsNames=Graph.getMatrixColumnNames(matrix)
     # add column or row to any matrix
     # it is assumed that added row or column has a name of it as a first element 
+    # verificating that data is in double array:
+    if rowsToAppend != None:
+      if type(rowsToAppend[0]) != type(rowsToAppend): rowsToAppend = list(rowsToAppend)
+    if columnsToAppend != None:
+      if type(columnsToAppend[0]) != type(columnsToAppend): columnsToAppend = list(columnsToAppend)
 
-    sets = list(matrix)
-    for o in sets:
-      if (list(o)[0] not in rowsNames): rowsNames.append(list(o)[0])
-      if (list(o)[1] not in columnsNames): columnsNames.append(list(o)[1])
+
     if rowsToAppend != None and columnsToAppend != None:
       for i in range(len(rowsToAppend)):
           # the first element of this row
@@ -247,8 +326,18 @@ class Graph:
     columnsAmount = len(columnVertices)
     # to find the number after infinity
     val = list(set(list(adjMatrix.values())))
-    val.sort()
-    maxNumLength = len(str(val[-2]))
+    valInt=[]
+    for i in val:
+      if type(i) != type(1) or type(i) == type(math.inf):
+        continue
+      else:
+        valInt.append(i)
+    if (len(valInt)!= 0):
+      valInt.sort() # What to do with - and / and etc 
+      maxNumLength = len(str(valInt[-1]))
+    else:
+      # We only have left infinities
+      maxNumLength=len(emptySymbol)
     dashesMultiplier = maxNumLength + 1 # because we also have | symbol per each number and not number too
     dashesChar = '—' * dashesMultiplier
     def spacesChar(numLen):

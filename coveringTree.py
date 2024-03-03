@@ -76,33 +76,22 @@ edges_colored=[]
 vertexAmount=0
 amountOfedges = 0
 adjMatrix = []
+vertices = []
 
 
 
 #################### TEST ################################
 
 
-vertices_ = ['a', 'b', 'c', 'd', 'e', 'g', 'h', 'f', 'h', 'k', 's', 'm', 'n', 't']
-edges_ = [['b', 'a', 529], ['a', 's', 1], ['c', 'a', 3]]
+# vertices_ = ['a', 'b', 'c', 'd', 'e', 'g', 'h', 'f', 'h', 'k', 's', 'm', 'n', 't']
+# edges_ = [['b', 'a', 529], ['a', 's', 1], ['c', 'a', 3], ['b','c', 20], ['b','d', 30], ['a', 'b', 2], ['a','c',3]]
 
-rows = [['a', 5, 6, 7, 8], ['b', 6, 6, 6, 6]]
-matrix_columns=['a','b','c','d']
-matrix = G.createMatrixD(rows=rows, columnsNames=matrix_columns)
-G.printMatrixDict(matrix)
-
-G.createLetterToIndexDict(vertices_)
-G.createIndexToLetter(vertices_)
-
-#printMatrix(edgesToAdjMatrix(vertices_, edges_))
-G.printMatrixDict(G.edgesToAdjMatrixDict(vertices_, edges_))
-G.exportEdges(edges_)
-G.exportVertices(vertices_)
-adjMatrixDict = G.edgesToAdjMatrixDict(vertices_, edges_)
-adjMatrix = G.edgesToAdjMatrix(vertices_, edges_)
-G.printMatrixToFile(adjMatrix)
-G.printMatrixDictToFile(adjMatrixDict)
-vertices__ = []
-edges__ = []
+# rows = [['a', 5, 6, 7, 8], ['b', 6, 6, 6, 6], ['c', 1, 2, 3, 4]]
+# matrix_columns=['a','b','c','d']
+# matrix = G.createMatrixD(rows=rows, columnsNames=matrix_columns)
+# G.printMatrixDict(matrix)
+# print(G.getRowNameOfMaxInColumn(matrix, columnName='a'))
+# print(G.getColumnNameOfMaxInRow(matrix, rowName='a'))
 
 
 #################### TEST ################################
@@ -179,12 +168,13 @@ elif inputType == IMPORT_TXT_INPUT_TYPE:
 
 
 
-# FORMATTING DATA BEFORE DOING ANYTHING AS IT IS EXPECTED TO BE
+# FORMATTING DATA BEFORE DOING ANYTHING AS IT IS EXPECTED TO BE ############
 edges_colored=edges
 edges = G.sortEdges(edges)
-vertices = sorted(vertices)
+
 # Deleting duplicates
 vertices = list(set(vertices)) 
+vertices = sorted(vertices)
 
 G.createIndexToLetter(vertices)
 G.createLetterToIndexDict(vertices)
@@ -199,7 +189,8 @@ while (True):
                     f"{OUTPUT_MATRIX}. Вывести матрицу смежности.\n"
                     f"{MINIMAL_COVERING_TREE}.Минимальное покрывающее дерево.\n"
                     f"\n{MAXIMUM_COVERING_TREE}.Максимальное покрывающее дерево.\n"
-                    f"{FORD_SHORTEST_PATH}. Дерево кратчайших путей по Форду.\n"))
+                    f"{FORD_SHORTEST_PATH}. Дерево кратчайших путей по Форду.\n"
+                    f"{EXPORT_TXT}. Экспортировать дуги и вершины в txt.\n"))
   # SORTING INDICES BY edges WEIGHT
   index = 0
   edges_weights = [x[2] for x in edges]
@@ -283,8 +274,71 @@ while (True):
         
 
   elif action == FORD_SHORTEST_PATH:
+    FIRST_COLUMN_NAME = ' '
     root = input("Введите корень дерева: ")
+    matrix = {}
+    # The column name
+    firstColumn = [' '] 
+    # Values of column
+    for _ in range(len(vertices)):
+      firstColumn.append(G.EMPTY_MATRIX_ITEM_SYMBOL)
+
+    matrix = G.createMatrixD(columns=[firstColumn],rowsNames=vertices)
+    matrix[root, FIRST_COLUMN_NAME] = 0
+
+    # colored[-1] - current
+    # colored[-2] - previous
+    colored = [FIRST_COLUMN_NAME, root] 
+    
+    currentColoredWeight = matrix[root, FIRST_COLUMN_NAME] # 0
+    counter = 0
+    while (colored[-1] != None):
+
+      currentColored = colored[-1]
+      previousColored = colored[-2]
+      # adding new column
+      G.appendMatrixD(matrix,columnsToAppend= [[currentColored] + [G.EMPTY_MATRIX_ITEM_SYMBOL for x in range(len(vertices))]])
+      currentColoredWeight = matrix[currentColored, previousColored] # we do create from any to e0 but not from e0 to any. e0 doesnt exist. 
+
+      for vertex in vertices:
+        previousWeight = matrix[vertex, previousColored]
+        # current colored to this new vertex we are checking what would the accumulative weight'd be
+        fromColoredToVertexWeight= currentColoredWeight + adjMatrix[currentColored, vertex]
+        # vertex in colored and its last weight is less than current possible 
+        # how to find its last? 
+        if vertex in colored:
+          if vertex in colored and G.getLastNum(G.getMatrixRow(matrix,vertex)) < fromColoredToVertexWeight:
+            matrix[vertex, currentColored] = '-'
+          # we found a better path than it used to be for colored
+          elif vertex in colored and G.getLastNum(G.getMatrixRow(matrix,vertex)) > fromColoredToVertexWeight:
+            matrix[vertex, currentColored] = fromColoredToVertexWeight
+            # change colored column name ?? 
+        else:
+          if previousWeight > fromColoredToVertexWeight and vertex not in colored:
+            matrix[vertex, currentColored] = fromColoredToVertexWeight
+          elif previousWeight <= fromColoredToVertexWeight and vertex not in colored:
+            matrix[vertex, currentColored] = previousWeight
+        
+      
+      # in what order? 
+      # TODO: Make sure it returns None when nothing is there
+      currentColored_ = G.getRowNameOfMinInColumn(matrix,currentColored)
+      if currentColored_ in colored: # e1 e2 e3.  #TODO: make it e1 b1 c1 e2 b2 c2 and not e1 b2 c3
+        colored.append(currentColored_ + f'{counter}')
+        counter+=1
+      else:
+        colored.append(currentColored_)
+    
+    G.printMatrixDict(matrix)
+      
+
+
+
+    
   elif action == OUTPUT_MATRIX:
     G.printMatrixDict(adjMatrix)
+  elif action == EXPORT_TXT:
+    G.exportEdges(edges)
+    G.exportVertices(vertices)
   
   input("\nPress any key to continue...\n")
