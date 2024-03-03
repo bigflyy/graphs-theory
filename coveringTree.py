@@ -1,11 +1,8 @@
 import numpy as np
 import networkx as nx 
 import matplotlib.pyplot as plt 
-import json
-from datetime import datetime
-from collections import defaultdict
-import math
-import sys
+import os
+
 
 #### My files
 from Graph import Graph as G
@@ -72,15 +69,20 @@ class GraphVisualization:
         plt.show()
 
 
-
 # Some variables for everything
 GV = GraphVisualization() 
 edges=[]            # [[vertexOne, vertexTwo, Weight, color], ...]
 edges_colored=[]
 vertexAmount=0
 amountOfedges = 0
-adjacencyMatrix = []
-vertices_ = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'f', 'g', 'h', 'k', 's', 'm', 'n', 't']
+adjMatrix = []
+
+
+
+#################### TEST ################################
+
+
+vertices_ = ['a', 'b', 'c', 'd', 'e', 'g', 'h', 'f', 'h', 'k', 's', 'm', 'n', 't']
 edges_ = [['b', 'a', 529], ['a', 's', 1], ['c', 'a', 3]]
 
 rows = [['a', 5, 6, 7, 8], ['b', 6, 6, 6, 6]]
@@ -93,20 +95,24 @@ G.createIndexToLetter(vertices_)
 
 #printMatrix(edgesToAdjMatrix(vertices_, edges_))
 G.printMatrixDict(G.edgesToAdjMatrixDict(vertices_, edges_))
-# G.exportEdges(edges_)
-# G.exportVertices(vertices_)
+G.exportEdges(edges_)
+G.exportVertices(vertices_)
 adjMatrixDict = G.edgesToAdjMatrixDict(vertices_, edges_)
 adjMatrix = G.edgesToAdjMatrix(vertices_, edges_)
-# G.printMatrixToFile(adjMatrix)
-# G.printMatrixDictToFile(adjMatrixDict)
+G.printMatrixToFile(adjMatrix)
+G.printMatrixDictToFile(adjMatrixDict)
 vertices__ = []
 edges__ = []
+
+
+#################### TEST ################################
 
 # USER INPUT
 inputType = int(input(f"Выберите тип ввода:\n "
              f"{MANUAL_INPUT_TYPE}. Ребра типа a b 10.\n "
              f"{MATRIX_INPUT_TYPE}. Ребра по матрице смежности (неориетированный).\n"
-             f"{ORIENTED_MATRIX_INPUT_TYPE}. Ребра по матрице смежности (ориентированный).\n"))
+             f"{ORIENTED_MATRIX_INPUT_TYPE}. Ребра по матрице смежности (ориентированный).\n"
+             f"{IMPORT_TXT_INPUT_TYPE}. Импорт из txt.\n"))
 if inputType == MANUAL_INPUT_TYPE:
 ## vertex amount
   vertexAmount = int(input("Введите кол-во вершин: "))
@@ -144,7 +150,35 @@ elif inputType == ORIENTED_MATRIX_INPUT_TYPE:
         weight_ = int(verticesTwoAndWeight[i+1])
         edges.append([vertexOne,vertexTwo,weight_])
 elif inputType == IMPORT_TXT_INPUT_TYPE:
-  G.importAdjMatrix(adjMatrix)
+  chosenEdgeFile = ""
+  chosenVertexFile = ""
+  edgesFiles = G.getAvailableEdgeFile()
+  verticesFiles = G.getAvailableVerticesFile()
+  edgeFileDict = {}
+  vertexFileDict = {}
+  i=1
+  print("Choose file to load edges: ")
+  for file in edgesFiles:
+    edgeFileDict[i]=file
+    print(f"{i}.{file}")
+    i+=1
+  edgeFileChoice = int(input())
+  chosenEdgeFile = edgeFileDict[edgeFileChoice]
+  print("Choose file to load vertices: \n")
+  i=1
+  for file in verticesFiles:
+    vertexFileDict[i]=file
+    print(f"{i}.{file}")
+    i+=1
+  vertexFileChoice = int(input())
+  chosenVertexFile = vertexFileDict[vertexFileChoice]
+
+  vertices = G.importFile(chosenVertexFile)
+  edges=G.importFile(chosenEdgeFile)
+
+
+
+
 # FORMATTING DATA BEFORE DOING ANYTHING AS IT IS EXPECTED TO BE
 edges_colored=edges
 edges = G.sortEdges(edges)
@@ -154,16 +188,16 @@ vertices = list(set(vertices))
 
 G.createIndexToLetter(vertices)
 G.createLetterToIndexDict(vertices)
-adjMatrix = G.edgesToAdjMatrix(vertices, edges)
+adjMatrix = G.edgesToAdjMatrixDict(vertices, edges)
 
-
+##############################################################################
 
 ## Main loop to build several graphs on one set of edges
 while (True):
   ## graph type
   action = int(input(f"Выберите действие:\n "
-                    f"{OUTPUT_MATRIX}. Вывести матрицу смежности."
-                    f"{MINIMAL_COVERING_TREE}.Минимальное покрывающее дерево."
+                    f"{OUTPUT_MATRIX}. Вывести матрицу смежности.\n"
+                    f"{MINIMAL_COVERING_TREE}.Минимальное покрывающее дерево.\n"
                     f"\n{MAXIMUM_COVERING_TREE}.Максимальное покрывающее дерево.\n"
                     f"{FORD_SHORTEST_PATH}. Дерево кратчайших путей по Форду.\n"))
   # SORTING INDICES BY edges WEIGHT
@@ -249,8 +283,8 @@ while (True):
         
 
   elif action == FORD_SHORTEST_PATH:
-    pass
+    root = input("Введите корень дерева: ")
   elif action == OUTPUT_MATRIX:
-    printMatrix(adjMatrix)
+    G.printMatrixDict(adjMatrix)
   
   input("\nPress any key to continue...\n")

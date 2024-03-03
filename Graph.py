@@ -6,6 +6,8 @@ from datetime import datetime
 from collections import defaultdict
 import math
 import sys
+import os
+
 def nested_dict(n, type):
     if n == 1:
         return defaultdict(type)
@@ -17,7 +19,10 @@ class Graph:
   INDEX_TO_LETTER = {}
   ORIGINAL_STDOUT = sys.stdout
   EMPTY_MATRIX_ITEM_SYMBOL = math.inf # how it is stored in matrix itself
-  TXT_FOLDER = "TXTS/"
+  TXT_FOLDER_RELATIVE_PATH = "TXTS/"
+  TXT_FOLDER_ABSOLUTE_PATH =  "TXTS"
+  EDGE_TXT_PREFIX = "edge-"
+  VERTICES_TXT_PREFIX = "vertices-"
   def createLetterToIndexDict(vertices, isSorted = False):
     if not isSorted:
       vertices = sorted(vertices)
@@ -100,12 +105,35 @@ class Graph:
     matrix = {}
     Graph.appendMatrixD(matrix, rowsToAppend=rows, columnsToAppend=columns, columnsNames=columnsNames, rowsNames=rowsNames)
     return matrix
+  def getMatrixRow(matrix, i):
+    row = []
+    columnNames = []
+    sets = list(matrix)
+    for o in sets:
+      if (list(o)[0] not in columnNames): columnNames.append(list(o)[1])
+    
+    for j in range (len(columnNames)):
+      row.append(matrix[i, j])
+    return row
+    
+    
+  def getMatrixColumn(matrix, j):
+    column = []
+    rowsNames = []
+    sets = list(matrix)
+    for o in sets:
+      if (list(o)[0] not in rowsNames): rowsNames.append(list(o)[0])
+    
+    for i in range (len(rowsNames)):
+      column.append(matrix[i, j])
+    return column
+    
+    
   def appendMatrixD(matrix, rowsToAppend = None, columnsToAppend =None, columnsNames=[], rowsNames=[]): 
     # add column or row to any matrix
     # it is assumed that added row or column has a name of it as a first element 
 
     sets = list(matrix)
-    vertices = []
     for o in sets:
       if (list(o)[0] not in rowsNames): rowsNames.append(list(o)[0])
       if (list(o)[1] not in columnsNames): columnsNames.append(list(o)[1])
@@ -252,14 +280,14 @@ class Graph:
         print(dashesStr)
 
   def printMatrixToFile(adjMatrix):
-    fileName = f"{Graph.TXT_FOLDER}{Graph.SAME_SECOND_NUM}adjMatrix-" + datetime.today().strftime('%Y-%m-%d-%H:%M:%S') +".txt"
+    fileName = f"{Graph.TXT_FOLDER_RELATIVE_PATH}{Graph.SAME_SECOND_NUM}adjMatrix-" + datetime.today().strftime('%Y-%m-%d-%H:%M:%S') +".txt"
     with open(fileName, 'w') as f:
       sys.stdout = f
       Graph.printMatrix(adjMatrix)
       sys.stdout = Graph.ORIGINAL_STDOUT
     Graph.SAME_SECOND_NUM+=1
   def printMatrixDictToFile(adjMatrix):
-    fileName = f"{Graph.TXT_FOLDER}{Graph.SAME_SECOND_NUM}adjMatrix-" + datetime.today().strftime('%Y-%m-%d-%H:%M:%S') +".txt"
+    fileName = f"{Graph.TXT_FOLDER_RELATIVE_PATH}{Graph.SAME_SECOND_NUM}adjMatrix-" + datetime.today().strftime('%Y-%m-%d-%H:%M:%S') +".txt"
     with open(fileName, 'w') as f:
       sys.stdout = f
       Graph.printMatrixDict(adjMatrix)
@@ -284,21 +312,37 @@ class Graph:
   # def exportAdjMatrix(adjMatrix):
   #   FILE_NAME = "adjMatrix" + datetime.today().strftime('%Y-%m-%d %H:%M:%S') +".txt"
   #   # dump the dict contents using json 
-  #   with open(TXT_FOLDER + FILE_NAME, 'w') as outfile:
+  #   with open(TXT_FOLDER_RELATIVE_PATH + FILE_NAME, 'w') as outfile:
   #       json.dump(adjMatrix, outfile)
   def exportEdges(edges):
-    FILE_NAME = f"{Graph.TXT_FOLDER}{Graph.SAME_SECOND_NUM}edges-" + datetime.today().strftime('%Y-%m-%d-%H:%M:%S') +".txt"
+    FILE_NAME = f"{Graph.TXT_FOLDER_RELATIVE_PATH}{Graph.SAME_SECOND_NUM}{Graph.EDGE_TXT_PREFIX}" + datetime.today().strftime('%Y-%m-%d-%H:%M:%S') +".txt"
     # dump the dict contents using json 
     with open(FILE_NAME, 'w') as outfile:
         json.dump(edges, outfile)
     Graph.SAME_SECOND_NUM+=1
   def exportVertices(vertices):
-    FILE_NAME = f"{Graph.TXT_FOLDER}{Graph.SAME_SECOND_NUM}vertices-" + datetime.today().strftime('%Y-%m-%d-%H:%M:%S') +".txt"
+    FILE_NAME = f"{Graph.TXT_FOLDER_RELATIVE_PATH}{Graph.SAME_SECOND_NUM}{Graph.VERTICES_TXT_PREFIX}" + datetime.today().strftime('%Y-%m-%d-%H:%M:%S') +".txt"
     # dump the dict contents using json 
     with open(FILE_NAME, 'w') as outfile:
         json.dump(vertices, outfile)
     Graph.SAME_SECOND_NUM+=1
-  def printAvailableFiles():
-    pass
   def drawAnyGraph():
     pass
+  def getAvailableFiles():
+    return [Graph.TXT_FOLDER_RELATIVE_PATH+ f for f in os.listdir(Graph.TXT_FOLDER_RELATIVE_PATH)]
+  def getAvailableEdgeFile():
+    files = Graph.getAvailableFiles()
+    edgeFiles = []
+    for file in files:
+      if Graph.EDGE_TXT_PREFIX in file:
+        edgeFiles.append(file)
+    
+    return edgeFiles
+  def getAvailableVerticesFile():
+    files = Graph.getAvailableFiles()
+    verticesFiles = []
+    for file in files:
+      if Graph.VERTICES_TXT_PREFIX in file:
+        verticesFiles.append(file)
+    
+    return verticesFiles

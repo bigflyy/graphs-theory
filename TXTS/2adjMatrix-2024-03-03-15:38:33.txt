@@ -1,34 +1,34 @@
    |a  |b  |c  |d  |e  |f  |f  |g  |g  |h  |h  |k  |m  |n  |s  |t  |
 ————————————————————————————————————————————————————————————————————
-a  |inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|1  |inf|
+a  |   |   |   |   |   |   |   |   |   |   |   |   |   |   |1  |   |
 ————————————————————————————————————————————————————————————————————
-b  |529|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|
+b  |529|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
 ————————————————————————————————————————————————————————————————————
-c  |3  |inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|
+c  |3  |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
 ————————————————————————————————————————————————————————————————————
-d  |inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|
+d  |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
 ————————————————————————————————————————————————————————————————————
-e  |inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|
+e  |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
 ————————————————————————————————————————————————————————————————————
-f  |inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|
+f  |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
 ————————————————————————————————————————————————————————————————————
-f  |inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|
+f  |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
 ————————————————————————————————————————————————————————————————————
-g  |inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|
+g  |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
 ————————————————————————————————————————————————————————————————————
-g  |inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|
+g  |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
 ————————————————————————————————————————————————————————————————————
-h  |inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|
+h  |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
 ————————————————————————————————————————————————————————————————————
-h  |inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|
+h  |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
 ————————————————————————————————————————————————————————————————————
-k  |inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|
+k  |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
 ————————————————————————————————————————————————————————————————————
-m  |inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|
+m  |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
 ————————————————————————————————————————————————————————————————————
-n  |inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|
+n  |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
 ————————————————————————————————————————————————————————————————————
-s  |inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|
+s  |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
 ————————————————————————————————————————————————————————————————————
-t  |inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|inf|
+t  |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
 ————————————————————————————————————————————————————————————————————
