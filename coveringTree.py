@@ -2,11 +2,14 @@ import numpy as np
 import networkx as nx 
 import matplotlib.pyplot as plt 
 import os
+import pandas as pd
+
 
 
 #### My files
 from Graph import Graph as G
 from CONSTS import *
+from tabulate import tabulate
 
 # вершина = vertex / vertices
 # дуга = edge / edges
@@ -83,12 +86,24 @@ vertices = []
 #################### TEST ################################
 
 
-# vertices_ = ['a', 'b', 'c', 'd', 'e', 'g', 'h', 'f', 'h', 'k', 's', 'm', 'n', 't']
-# edges_ = [['b', 'a', 529], ['a', 's', 1], ['c', 'a', 3], ['b','c', 20], ['b','d', 30], ['a', 'b', 2], ['a','c',3]]
+vertices_ = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'k', 'm', 'n', 's', 't']
+edges_ = [['b', 'a', 529], ['a', 's', 1], ['c', 'a', 3], ['b','c', 20], ['b','d', 30], ['a', 'b', 2], ['a','c',3]]
 
-# rows = [['a', 5, 6, 7, 8], ['b', 6, 6, 6, 6], ['c', 1, 2, 3, 4]]
-# matrix_columns=['a','b','c','d']
-# matrix = G.createMatrixD(rows=rows, columnsNames=matrix_columns)
+rows = [['a', 5, 6, 7, 8], ['b', 6, 6, 6, 6], ['c', 1, 2, 3, 4]]
+matrix_columns=['a','b','c','d']
+
+
+G.createIndexToLetter(vertices_)
+G.createLetterToIndexDict(vertices_)
+matrix = G.edgesToAdjMatrix(vertices_, edges_)
+matrixD = G.edgesToAdjMatrixDict(vertices_, edges_)
+matrix_np = np.array(matrix)
+print(G.getMatrixColumnNames(matrixD))
+print(G.getMatrixRowNames(matrixD))
+df = pd.DataFrame(matrix_np, columns=G.getMatrixColumnNames(matrixD), index=G.getMatrixRowNames(matrixD))
+print(tabulate(df, tablefmt="simple_grid"))
+print(df.iat[1,1])
+
 # G.printMatrixDict(matrix)
 # print(G.getRowNameOfMaxInColumn(matrix, columnName='a'))
 # print(G.getColumnNameOfMaxInRow(matrix, rowName='a'))
@@ -298,7 +313,7 @@ while (True):
       previousColored = colored[-2]
       # adding new column
       G.appendMatrixD(matrix,columnsToAppend= [[currentColored] + [G.EMPTY_MATRIX_ITEM_SYMBOL for x in range(len(vertices))]])
-      currentColoredWeight = matrix[currentColored, previousColored] # we do create from any to e0 but not from e0 to any. e0 doesnt exist. 
+      currentColoredWeight = matrix[currentColored, previousColored] # we do create from any to e0 but not from e0 to any. e0 doesnt exist.
 
       for vertex in vertices:
         previousWeight = matrix[vertex, previousColored]

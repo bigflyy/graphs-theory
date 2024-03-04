@@ -7,6 +7,7 @@ from collections import defaultdict
 import math
 import sys
 import os
+import tabulate
 
 def nested_dict(n, type):
     if n == 1:
@@ -102,7 +103,7 @@ class Graph:
   
   def createMatrixD(rows = None, columns = None, rowsNames=[], columnsNames=[]):
     # They are different to Adj matrices, because they are произвольные
-    if len(rowsNames) == 0 and len(columnsNames==0):
+    if len(rowsNames) == 0 and len(columnsNames)==0:
       raise("When creating matrix you have to pass rowsNames / columnsNames.")
     matrix = {}
     Graph.appendMatrixD(matrix, rowsToAppend=rows, columnsToAppend=columns, columnsNames=columnsNames, rowsNames=rowsNames)
@@ -257,6 +258,7 @@ class Graph:
           for j in range(1,len(columnsToAppend[i])): 
             # j-1 because j goes 1, 2 ... and we need from first column
             matrix[rowsNames[j-1], columnName] = column[j] 
+            
   def edgesToAdjMatrixDict(vertices, edges, isSorted = False):
     if not isSorted:
       edges = Graph.sortEdges(edges) # Safe redundancy
@@ -313,19 +315,8 @@ class Graph:
           dashesStr += dashesChar
         print(outputStr)
         print(dashesStr)
-
-  def printMatrixDict(adjMatrix, startingLetter=None, letterOrder=None, emptySymbol = ''):
-    # !!! adjMatrix sets should be sorted 
-    sets = list(adjMatrix)
-    rowVertices = []
-    columnVertices = []
-    for o in sets:
-      if (list(o)[0] not in rowVertices): rowVertices.append(list(o)[0])
-      if (list(o)[1] not in columnVertices): columnVertices.append(list(o)[1])
-    rowsAmount = len(rowVertices)
-    columnsAmount = len(columnVertices)
-    # to find the number after infinity
-    val = list(set(list(adjMatrix.values())))
+  def calculateMaxNumLength(matrix, emptySymbol):
+    val = list(set(list(matrix.values())))
     valInt=[]
     for i in val:
       if type(i) != type(1) or type(i) == type(math.inf):
@@ -338,20 +329,36 @@ class Graph:
     else:
       # We only have left infinities
       maxNumLength=len(emptySymbol)
+    return maxNumLength
+  
+  def printMatrixDict(adjMatrix, columnPrint=False, noNextLinePrint=False, startingLetter=None, letterOrder=None, emptySymbol = ''):
+    # !!! adjMatrix sets should be sorted 
+    sets = list(adjMatrix)
+    rowVertices = []
+    columnVertices = []
+    for o in sets:
+      if (list(o)[0] not in rowVertices): rowVertices.append(list(o)[0])
+      if (list(o)[1] not in columnVertices): columnVertices.append(list(o)[1])
+    rowsAmount = len(rowVertices)
+    columnsAmount = len(columnVertices)
+    # to find the number after infinity
+    maxNumLength = Graph.calculateMaxNumLength(adjMatrix, emptySymbol)
     dashesMultiplier = maxNumLength + 1 # because we also have | symbol per each number and not number too
     dashesChar = '—' * dashesMultiplier
     def spacesChar(numLen):
       return ' ' * (maxNumLength-numLen)
     
 
+
     # Header:
-    headerStr = spacesChar(0) + '|'
-    headerDashesStr = dashesChar
-    for i in columnVertices:
-      headerStr += f"{i}{spacesChar(len(i))}|"
-      headerDashesStr += dashesChar
-    print(headerStr)
-    print(headerDashesStr)
+    if (not columnPrint):
+      headerStr = spacesChar(0) + '|'
+      headerDashesStr = dashesChar
+      for i in columnVertices:
+        headerStr += f"{i}{spacesChar(len(i))}|"
+        headerDashesStr += dashesChar
+      print(headerStr)
+      print(headerDashesStr)
 
 
     if startingLetter != None:
@@ -368,6 +375,28 @@ class Graph:
         print(outputStr)
         print(dashesStr)
 
+  # a|
+  # ---
+  # b|
+  # ---
+
+  def printColumnMatrixDict(matrix, columnName, noNextLine=True, emptySymbol =''):
+    maxNumLength = Graph.calculateMaxNumLength(matrix, emptySymbol)
+    dashesMultiplier = maxNumLength + 1 # because we also have | symbol per each number and not number too
+    dashesChar = '—' * dashesMultiplier
+    def spacesChar(numLen):
+      return ' ' * (maxNumLength-numLen)
+
+
+
+
+    rowNames=Graph.getMatrixRowNames(matrix)
+    columnNames=Graph.getMatrixColumnNames(matrix)
+    # if that is the first column print also row names
+    if columnName == columnNames[0]:
+      for i in range(len(rowNames)):
+        pass
+      
   def printMatrixToFile(adjMatrix):
     fileName = f"{Graph.TXT_FOLDER_RELATIVE_PATH}{Graph.SAME_SECOND_NUM}adjMatrix-" + datetime.today().strftime('%Y-%m-%d-%H:%M:%S') +".txt"
     with open(fileName, 'w') as f:
@@ -433,5 +462,25 @@ class Graph:
     for file in files:
       if Graph.VERTICES_TXT_PREFIX in file:
         verticesFiles.append(file)
-    
     return verticesFiles
+  
+  # def renameMatrixD(matrix, columnNameOld="", columnNameNew="", rowNameOld="", rowNameNew=""):
+  #   if columnNameOld=="" and rowNameOld=="":
+  #     raise("Column/row name olds not provided")
+  #   elif columnNameNew == "" and rowNameNew=="":
+  #     raise("Column/row name new not provided")
+    
+
+  #   if columnNameOld!="":
+  #     order = matrix.keys()
+  #     keys = order
+  #     renameElementIndex = keys.index(columnNameOld)
+  #     keys[renameElementIndex] = col
+
+  #     thisColumnValues = Graph.getMatrixColumn(matrix,columnNameOld)
+  #     matrixRowsNames = Graph.getMatrixRowNames(matrix)
+  #     for i in range(len(matrixRowsNames)):
+  #       matrix[matrixRowsNames[i], columnNameNew] = thisColumnValues[i]
+  #       del matrix[matrixRowsNames[i], columnNameOld] 
+
+    
